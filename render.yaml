@@ -1,0 +1,49 @@
+services:
+  # ── Spring Boot Backend (Docker) ──────────────────────────────────────────
+  - type: web
+    name: smartattend-backend
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: smartattend-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: smartattend-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: smartattend-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: smartattend-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: smartattend-db
+          property: password
+    healthCheckPath: /api/users
+
+  # ── React / Vite Frontend (Docker + Nginx) ────────────────────────────────
+  - type: web
+    name: smartattend-frontend
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: VITE_API_URL
+        sync: false          # Set to: https://smartattend-backend.onrender.com/api
+
+databases:
+  # Render-managed PostgreSQL (Free tier)
+  - name: smartattend-db
+    plan: free
+    region: oregon
